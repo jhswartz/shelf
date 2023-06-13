@@ -1,0 +1,19 @@
+DEMO CODE
+
+  $ printf "\110\307\307\200\000\000\000" >  /tmp/a.code  # mov $0x80,%rdi
+  $ printf "\110\307\300\074\000\000\000" >> /tmp/a.code  # mov $0x3c,%rax
+  $ printf "\017\005"                     >> /tmp/a.code  # syscall
+
+
+GENERATE AN EXECUTABLE OBJECT
+
+  $ ./shelf amd64/linux/exec.plan
+  usage: exec.plan TEXT-FILE DATA-FILE BSS-SIZE
+
+  $ ./shelf amd64/linux/exec.plan /tmp/a.code /dev/null 0 > /tmp/a.out
+  $ chmod 755 /tmp/a.out
+
+  $ strace -e trace=all /tmp/a.out
+  execve("/tmp/a.out", ["/tmp/a.out"], 0x7ffd7141ec10 /* 35 vars */) = 0
+  exit(128)                               = ?
+  +++ exited with 128 +++

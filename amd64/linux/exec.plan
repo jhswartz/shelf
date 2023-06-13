@@ -1,0 +1,133 @@
+EHDR_SIZE=64
+PHDR_SIZE=56
+SHDR_SIZE=64
+
+OFFSET=0
+VMA=0x40000000
+SEGMENT_ALIGN=0x800
+
+PHDRS_OFFSET=${PHDRS_OFFSET:-0}
+PHDRS_SIZE=${PHDRS_SIZE:-0}
+SHDRS_OFFSET=${SHDRS_OFFSET:-0}
+TEXT_OFFSET=${TEXT_OFFSET:-0}
+TEXT_SIZE=${TEXT_SIZE:-0}
+DATA_OFFSET=${DATA_OFFSET:-0}
+DATA_SIZE=${DATA_SIZE:-0}
+BSS_SIZE=${BSS_SIZE:-0}
+
+text()
+{
+	TEXT_OFFSET=$OFFSET
+	file $1
+	TEXT_SIZE=$(($OFFSET - $TEXT_OFFSET))
+	align $SEGMENT_ALIGN
+}
+
+data()
+{
+	DATA_OFFSET=$OFFSET
+	file $1
+	DATA_SIZE=$(($OFFSET - $DATA_OFFSET))
+	align $SEGMENT_ALIGN
+}
+
+bss()
+{
+	BSS_OFFSET=$OFFSET
+	BSS_SIZE=$1
+}
+
+shstrtab()
+{
+	SHSTRTAB_OFFSET=$OFFSET
+	string ""
+
+	SHSTRTAB_SHSTRTAB=$(($OFFSET - $SHSTRTAB_OFFSET))
+	string ".shstrtab"
+
+	SHSTRTAB_TEXT=$(($OFFSET - $SHSTRTAB_OFFSET))
+	string ".text"
+
+	SHSTRTAB_DATA=$(($OFFSET - $SHSTRTAB_OFFSET))
+	string ".data"
+
+	SHSTRTAB_BSS=$(($OFFSET - $SHSTRTAB_OFFSET))
+	string ".bss"
+
+	SHSTRTAB_SIZE=$(($OFFSET - $SHSTRTAB_OFFSET))
+	align 16
+}
+
+shdrs()
+{
+	SHDRS_OFFSET=$OFFSET
+
+	shdr 0 0 0 0 0 0 0 0 0 0
+
+	shdr $SHSTRTAB_TEXT $SHT_PROGBITS $(($SHF_ALLOC | $SHF_EXEC)) \
+	     $(($VMA + $TEXT_OFFSET)) $TEXT_OFFSET $TEXT_SIZE \
+	     0 0 1 0
+
+	shdr $SHSTRTAB_DATA $SHT_PROGBITS $(($SHF_WRITE | $SHF_ALLOC)) \
+	     $(($VMA + $DATA_OFFSET)) $DATA_OFFSET $DATA_SIZE \
+	     0 0 1 0
+
+	shdr $SHSTRTAB_BSS $SHT_NOBITS $(($SHF_WRITE | $SHF_ALLOC)) \
+	     $(($VMA + $DATA_OFFSET)) $BSS_OFFSET $BSS_SIZE \
+	     0 0 1 0
+
+	shdr $SHSTRTAB_SHSTRTAB $SHT_STRTAB 0 \
+	     0 $SHSTRTAB_OFFSET $SHSTRTAB_SIZE \
+	     0 0 1 0
+}
+
+phdrs()
+{
+	PHDRS_OFFSET=$OFFSET
+
+	phdr $PT_LOAD $PF_R \
+	     0x000 $VMA $VMA $TEXT_OFFSET $TEXT_OFFSET \
+	     $SEGMENT_ALIGN
+
+	phdr $PT_LOAD $(($PF_R | $PF_X)) $TEXT_OFFSET \
+	     $(($VMA + $TEXT_OFFSET)) $(($VMA + $TEXT_OFFSET)) \
+	     $TEXT_SIZE $TEXT_SIZE \
+	     $SEGMENT_ALIGN
+
+	phdr $PT_LOAD $(($PF_R | $PF_W)) $DATA_OFFSET \
+	     $(($VMA + $DATA_OFFSET)) $(($VMA + $DATA_OFFSET)) \
+	     $DATA_SIZE $(($DATA_SIZE + $BSS_SIZE)) \
+	     $SEGMENT_ALIGN
+
+	PHDRS_SIZE=$(($OFFSET - $PHDRS_OFFSET))
+	align $SEGMENT_ALIGN
+}
+
+plan()
+{
+	ident $ELFCLASS64 $ELFDATA2LSB $EV_CURRENT $ELFOSABI_NONE
+	header $ET_EXEC $EM_X86_64 $EV_CURRENT \
+	       $(($VMA + $TEXT_OFFSET)) $PHDRS_OFFSET $SHDRS_OFFSET \
+	       0 $EHDR_SIZE \
+	       $PHDR_SIZE 3 \
+	       $SHDR_SIZE 5 4
+	phdrs
+	text $1
+	data $2
+	bss  $3
+	shstrtab
+	shdrs	
+}
+
+main()
+{
+	if [ $# -ne 3 ]
+	then
+		printf "usage: exec.plan TEXT-FILE DATA-FILE BSS-SIZE\n" 1>&2
+		exit 2
+	fi
+
+	plan "$@"
+}
+
+main "$@"
