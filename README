@@ -1,8 +1,3 @@
-ELF OBJECT GENRATOR
-
-  An ELF object generator
-
-
 LINUX/AMD64 ELF EXECUTABLE DEMO
 
   $ printf "\x6a\x01\x5f" >  /tmp/false.obj    # mov EXIT_FAILURE rdi
