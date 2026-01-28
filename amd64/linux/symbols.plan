@@ -1,0 +1,119 @@
+EHDR_SIZE=64
+SHDR_SIZE=64
+SYM_SIZE=24
+
+OFFSET=0
+
+SHDRS_OFFSET=${SHDRS_OFFSET:-0}
+TEXT_OFFSET=${TEXT_OFFSET:-0}
+SYMTAB_OFFSET=${SYMTAB_OFFSET:-0}
+SYMTAB_SIZE=${SYMTAB_SIZE:-0}
+STRTAB_OFFSET=${STRTAB_OFFSET:-0}
+STRTAB_SIZE=${STRTAB_SIZE:-0}
+
+text()
+{
+	TEXT_OFFSET=$OFFSET
+}
+
+symtab()
+{
+	SYMTAB_OFFSET=$OFFSET
+	sym 0 0 0 0 0 0
+
+	local index=1
+	
+	while read -r addr name
+	do
+		sym $index $(((STB_GLOBAL << 4) | STT_FUNC)) $STV_DEFAULT 1 0x$addr 0
+		index=$((index + ${#name} + 1))
+	done < "$1"
+	
+	SYMTAB_SIZE=$(($OFFSET - $SYMTAB_OFFSET))
+}
+
+strtab()
+{
+	STRTAB_OFFSET=$OFFSET
+	string ""
+
+	while read -r addr name
+	do
+		string "$name"
+	done < "$1"
+
+	STRTAB_SIZE=$(($OFFSET - $STRTAB_OFFSET))
+}
+
+shstrtab()
+{
+	SHSTRTAB_OFFSET=$OFFSET
+	string ""
+
+	SHSTRTAB_TEXT=$(($OFFSET - $SHSTRTAB_OFFSET))
+	string ".text"
+
+	SHSTRTAB_SHSTRTAB=$(($OFFSET - $SHSTRTAB_OFFSET))
+	string ".shstrtab"
+
+	SHSTRTAB_SYMTAB=$(($OFFSET - $SHSTRTAB_OFFSET))
+	string ".symtab"
+
+	SHSTRTAB_STRTAB=$(($OFFSET - $SHSTRTAB_OFFSET))
+	string ".strtab"
+	
+	SHSTRTAB_SIZE=$(($OFFSET - $SHSTRTAB_OFFSET))
+	align 16
+}
+
+shdrs()
+{
+	SHDRS_OFFSET=$OFFSET
+
+	shdr 0 0 0 0 0 0 0 0 0 0
+	
+	shdr $SHSTRTAB_TEXT $SHT_PROGBITS $(($SHF_ALLOC | $SHF_EXEC)) \
+	     0 $TEXT_OFFSET 0 \
+	     0 0 1 0
+
+	shdr $SHSTRTAB_SYMTAB $SHT_SYMTAB 0 \
+	     0 $SYMTAB_OFFSET $SYMTAB_SIZE \
+	     3 1 8 $SYM_SIZE
+	
+	shdr $SHSTRTAB_STRTAB $SHT_STRTAB 0 \
+	     0 $STRTAB_OFFSET $STRTAB_SIZE \
+	     0 0 1 0
+
+	shdr $SHSTRTAB_SHSTRTAB $SHT_STRTAB 0 \
+	     0 $SHSTRTAB_OFFSET $SHSTRTAB_SIZE \
+	     0 0 1 0
+}
+
+plan()
+{
+	ident $ELFCLASS64 $ELFDATA2LSB $EV_CURRENT $ELFOSABI_NONE
+	header $ET_REL $EM_X86_64 $EV_CURRENT \
+	       0 0 $SHDRS_OFFSET \
+	       0 $EHDR_SIZE \
+	       0 0 \
+	       $SHDR_SIZE 5 4
+
+	text
+	symtab "$1"
+	strtab "$1"
+	shstrtab
+	shdrs
+}
+
+main()
+{
+	if [ $# -ne 1 ]
+	then
+		printf "usage: symbols.plan SYMBOL-FILE\n" 1>&2
+		exit 2
+	fi
+
+	plan "$@"
+}
+
+main "$@"
