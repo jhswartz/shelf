@@ -31,14 +31,22 @@ PLANS
               cutable, the entry point is automatically set to the start  of
               the provided TEXT-FILE.
 
+       amd64/linux/flat.plan TEXT-FILE
+              Generates   a   minimal   standalone   Linux/amd64  executable
+              (ET_EXEC)  containing  only  a  single  code  segment.  Unlike
+              exec.plan,  this  plan  generates no section headers and omits
+              data or BSS segments. It utilizes a fixed Virtual  Memory  Ad‐
+              dress  (VMA)  base, starting at 0x40000000. The entry point is
+              set to the start of the provided TEXT-FILE.
+
        amd64/linux/reloc.plan TEXT-FILE DATA-FILE BSS-SIZE
               Generates a relocatable object file (ET_REL) with a functional
               symbol table and section headers.
 
        amd64/linux/symbols.plan SYMBOL-FILE
               Generates an ET_REL object containing only symbol metadata for
-              use  as  split debug info, for example, with gdb's add-symbol-
-              file command. SYMBOL-FILE is expected to be a text file  where
+              use as split debug info, for example, with  gdb's  add-symbol-
+              file  command. SYMBOL-FILE is expected to be a text file where
               each line defines a symbol in the following format: OFFSET LA‐
               BEL
 
@@ -114,15 +122,15 @@ AMD64 LINUX SYMBOLS EXAMPLE
             3: 000000000000004a     0 FUNC    GLOBAL DEFAULT    1 Exit
 
 STANDARDS
-       shelf is a generic ELF generation engine. The specific standards  and
+       shelf  is a generic ELF generation engine. The specific standards and
        ABI compliance are determined by the chosen plan file.
 
-       Plans  under  the  amd64/linux/ directory target the ELF-64 format as
-       defined in the System V ABI  for  amd64.  These  plans  utilize  ELF‐
+       Plans under the amd64/linux/ directory target the  ELF-64  format  as
+       defined  in  the  System  V  ABI  for amd64. These plans utilize ELF‐
        DATA2LSB (little-endian) encoding and EM_X86_64 machine types.
 
 SEE ALSO
-       gdb(1), mle(1), readelf(1), elf(5),
+       gdb(1), mle(1), mli-amd64(1), readelf(1), elf(5),
 
 AUTHOR
        Justin Swartz <justin.swartz@risingedge.co.za>

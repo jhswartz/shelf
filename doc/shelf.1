@@ -19,6 +19,9 @@ The generator's structure is defined by \fBplan\fR files, which are shell script
 \fBamd64/linux/exec.plan\fR \fITEXT-FILE DATA-FILE BSS-SIZE\fR
 Generates a standalone Linux/amd64 executable (ET_EXEC) with PT_LOAD program headers. It utilizes a fixed Virtual Memory Address (VMA) base, starting at \fB0x40000000\fR. Users should ensure that the machine code in the \fITEXT-FILE\fR is position-independent or specifically assembled to run at the defined VMA base to avoid segmentation faults. When generating an executable, the entry point is automatically set to the start of the provided \fITEXT-FILE\fR.
 .TP
+\fBamd64/linux/flat.plan\fR \fITEXT-FILE\fR
+Generates a minimal standalone Linux/amd64 executable (ET_EXEC) containing only a single code segment. Unlike \fBexec.plan\fR, this plan generates no section headers and omits data or BSS segments. It utilizes a fixed Virtual Memory Address (VMA) base, starting at \fB0x40000000\fR. The entry point is set to the start of the provided \fITEXT-FILE\fR.
+.TP
 \fBamd64/linux/reloc.plan\fR \fITEXT-FILE DATA-FILE BSS-SIZE\fR
 Generates a relocatable object file (ET_REL) with a functional symbol table and section headers.
 .TP
@@ -113,6 +116,7 @@ plans utilize \fBELFDATA2LSB\fR (little-endian) encoding and
 .SH SEE ALSO
 .BR gdb (1),
 .BR mle (1),
+.BR mli-amd64 (1),
 .BR readelf (1),
 .BR elf (5),
 
