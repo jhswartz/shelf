@@ -1,16 +1,1 @@
-LINUX/AMD64 ELF EXECUTABLE DEMO
-
-  $ printf "\x6a\x01\x5f" >  /tmp/false.obj    # mov EXIT_FAILURE rdi
-  $ printf "\x6a\x3c\x58" >> /tmp/false.obj    # mov SYS_EXIT rax
-  $ printf "\x0f\x05"     >> /tmp/false.obj    # syscall
-
-  $ ./shelf amd64/linux/exec.plan
-  usage: exec.plan TEXT-FILE DATA-FILE BSS-SIZE
-
-  $ ./shelf amd64/linux/exec.plan /tmp/false.obj /dev/null 0 > /tmp/false
-  $ chmod 755 /tmp/false
-
-  $ strace -e trace=all /tmp/false
-  execve("/tmp/false", ["/tmp/false"], 0x7ffe5f998de0 /* 42 vars */) = 0
-  exit(1)                                 = ?
-  +++ exited with 1 +++
+doc/shelf.txt
