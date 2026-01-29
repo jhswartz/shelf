@@ -122,7 +122,7 @@ STANDARDS
        DATA2LSB (little-endian) encoding and EM_X86_64 machine types.
 
 SEE ALSO
-       gdb(1), readelf(1), elf(5)
+       gdb(1), mle(1), readelf(1), elf(5),
 
 AUTHOR
        Justin Swartz <justin.swartz@risingedge.co.za>
