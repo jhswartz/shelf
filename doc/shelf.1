@@ -1,15 +1,19 @@
 .TH SHELF 1 "January 2026" "SHELF" "General Commands Manual"
+
 .SH NAME
 shelf \- toolchain-independent ELF object generator
+
 .SH SYNOPSIS
 .B shelf
 .I PLAN
 [\fIPLAN_ARGUMENTS\fR]
+
 .SH DESCRIPTION
 .B shelf
 is a standalone shell script designed to generate custom ELF (Executable and Linkable Format) objects without the requirement of an existing toolchain intended for the desired target. It operates in two-passes: the first pass calculates offsets and sizes, while the second pass performs the final object output to stdout.
 .PP
 The generator's structure is defined by \fBplan\fR files, which are shell script plug-ins that use \fBshelf\fR directives to describe the ELF layout: headers, sections, and segments. While intended for bootstrapping executables and relocatable objects, this level of control also enables the generation of auxiliary symbol objects for debugging and reverse engineering purposes.
+
 .SH PLANS
 .TP
 \fBamd64/linux/exec.plan\fR \fITEXT-FILE DATA-FILE BSS-SIZE\fR
@@ -20,6 +24,7 @@ Generates a relocatable object file (ET_REL) with a functional symbol table and 
 .TP
 \fBamd64/linux/symbols.plan\fR \fISYMBOL-FILE\fR
 Generates an ET_REL object containing only symbol metadata for use as split debug info, for example, with gdb's \fBadd-symbol-file\fR command. \fISYMBOL-FILE\fR is expected to be a text file where each line defines a symbol in the following format: \fBOFFSET LABEL\fR
+
 .SH AMD64 LINUX EXECUTABLE EXAMPLE
 .nf
 $ printf "\\x6a\\x01\\x5f\\x6a\\x3c\\x58\\x0f\\x05" > /tmp/false.obj
@@ -53,6 +58,7 @@ execve("/tmp/false", ["/tmp/false"], 0x7ffe5f998de0 /* 42 vars */) = 0
 exit(1)                                 = ? 
 +++ exited with 1 +++
 .fi
+
 .SH AMD64 LINUX SYMBOLS EXAMPLE
 .nf
 $ cat > /tmp/demo.map << EOF
@@ -93,6 +99,7 @@ Symbol table '.symtab' contains 4 entries:
      2: 0000000000000001     0 FUNC    GLOBAL DEFAULT    1 Start
      3: 000000000000004a     0 FUNC    GLOBAL DEFAULT    1 Exit
 .fi
+
 .SH STANDARDS
 .B shelf
 is a generic ELF generation engine. The specific standards and ABI
@@ -102,7 +109,11 @@ Plans under the \fBamd64/linux/\fR directory target the \fBELF-64\fR
 format as defined in the \fBSystem V ABI\fR for \fBamd64\fR. These
 plans utilize \fBELFDATA2LSB\fR (little-endian) encoding and
 \fBEM_X86_64\fR machine types.
+
 .SH SEE ALSO
 .BR gdb (1),
 .BR readelf (1),
 .BR elf (5)
+
+.SH AUTHOR
+Justin Swartz <justin.swartz@risingedge.co.za>

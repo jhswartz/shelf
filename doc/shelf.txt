@@ -124,4 +124,7 @@ STANDARDS
 SEE ALSO
        gdb(1), readelf(1), elf(5)
 
+AUTHOR
+       Justin Swartz <justin.swartz@risingedge.co.za>
+
 SHELF                           January 2026                        SHELF(1)
