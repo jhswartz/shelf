@@ -1,0 +1,63 @@
+#!/bin/sh
+
+PROGRAM="shelf"
+MANUAL="shelf.1"
+
+PREFIX="${PREFIX:-/usr/local}"
+PREFIX_BIN_DIR="${PREFIX}/bin"
+PREFIX_MAN_DIR="${PREFIX}/share/man/man1"
+PREFIX_SHARE_PROGRAM_DIR="${PREFIX}/share/${PROGRAM}"
+
+set -e
+
+usage()
+{
+	printf "usage: setup {install|uninstall}\n"
+}
+
+install()
+{
+	set -x
+
+	mkdir -p "${PREFIX_BIN_DIR}"
+	cp "src/${PROGRAM}" "${PREFIX_BIN_DIR}/"
+
+	mkdir -p "${PREFIX_MAN_DIR}"
+	cp "doc/${MANUAL}" "${PREFIX_MAN_DIR}/"
+
+	cp -r "share" "${PREFIX_SHARE_PROGRAM_DIR}"
+}
+
+uninstall()
+{
+	set -x
+	rm -f "${PREFIX_BIN_DIR}/${PROGRAM}" "${PREFIX_MAN_DIR}/${MANUAL}"
+	rm -rf "${PREFIX_SHARE_PROGRAM_DIR}"
+}
+
+main()
+{
+	case $# in
+	(1)
+		case $1 in
+		("install")
+			install
+			;;
+
+		("uninstall")
+			uninstall
+			;;
+
+		(*)
+			usage
+			;;
+		esac
+		;;
+
+	(*)
+		usage
+		;;
+	esac
+}
+
+main "$@"

@@ -31,7 +31,7 @@ Generates an ET_REL object containing only symbol metadata for use as split debu
 .SH AMD64 LINUX EXECUTABLE EXAMPLE
 .nf
 $ printf "\\x6a\\x01\\x5f\\x6a\\x3c\\x58\\x0f\\x05" > /tmp/false.obj
-$ shelf amd64/linux/exec.plan /tmp/false.obj /dev/null 0 > /tmp/false
+$ shelf /usr/local/share/shelf/amd64/linux/exec.plan /tmp/false.obj /dev/null 0 > /tmp/false
 
 $ readelf -h /tmp/false
 ELF Header:
@@ -70,7 +70,7 @@ $ cat > /tmp/demo.map << EOF
 0000004a Exit
 EOF
 
-$ shelf amd64/linux/symbols.plan /tmp/demo.map > /tmp/demo.sym
+$ shelf /usr/local/share/shelf/amd64/linux/symbols.plan /tmp/demo.map > /tmp/demo.sym
 
 $ readelf -h /tmp/demo.sym
 ELF Header:
@@ -105,13 +105,9 @@ Symbol table '.symtab' contains 4 entries:
 
 .SH STANDARDS
 .B shelf
-is a generic ELF generation engine. The specific standards and ABI
-compliance are determined by the chosen \fBplan\fR file.
+is a generic ELF generation engine. The specific standards and ABI compliance are determined by the chosen \fBplan\fR file.
 .PP
-Plans under the \fBamd64/linux/\fR directory target the \fBELF-64\fR
-format as defined in the \fBSystem V ABI\fR for \fBamd64\fR. These
-plans utilize \fBELFDATA2LSB\fR (little-endian) encoding and
-\fBEM_X86_64\fR machine types.
+amd64/linux plans target the \fBELF-64\fR format as defined in the \fBSystem V ABI\fR for \fBamd64\fR. These plans utilize \fBELFDATA2LSB\fR (little-endian) encoding and \fBEM_X86_64\fR machine types.
 
 .SH SEE ALSO
 .BR gdb (1),
